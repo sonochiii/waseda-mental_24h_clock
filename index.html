@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <title>Waseda Mental Clinic - 24H Management Clock</title>
     <style>
-        body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #222; overflow: hidden; }
-        svg { width: 90vmin; height: 90vmin; font-family: 'Helvetica Neue', Arial, sans-serif; }
-        .second-dot { fill: rgba(255, 255, 255, 0.3); }
-        .second-dot.active { fill: #e74c3c; filter: drop-shadow(0 0 2px #e74c3c); }
+        /* Google Fontsから丸みのあるフォント（M PLUS Rounded 1c）を読み込み */
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
+
+        body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
+        svg { width: 95vmin; height: 95vmin; filter: drop-shadow(0 0 15px rgba(0,0,0,0.5)); }
+        
+        /* フォント設定 */
+        text { font-family: 'M PLUS Rounded 1c', sans-serif; }
+        
+        /* 秒ドットの視認性向上 */
+        .second-dot { fill-opacity: 0.9; }
         #second-hand { transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.2); }
     </style>
 </head>
@@ -21,16 +28,16 @@
     
     <circle cx="500" cy="500" r="495" fill="url(#bg)" stroke="#111" stroke-width="2"/>
     
+    <text x="500" y="700" text-anchor="middle" font-size="38" fill="#001F3F">早稲田メンタルクリニック</text>
+
     <g id="ticks"></g>
     <g id="numbers"></g>
 
-    <text x="500" y="680" text-anchor="middle" font-size="32" font-weight="bold" fill="#001F3F" opacity="0.8">早稲田メンタルクリニック</text>
-
     <g id="hands">
-        <line id="hour-hand" x1="500" y1="500" x2="500" y2="280" stroke="#111" stroke-width="12" stroke-linecap="round" />
-        <line id="minute-hand" x1="500" y1="500" x2="500" y2="150" stroke="#111" stroke-width="8" stroke-linecap="round" />
-        <line id="second-hand" x1="500" y1="550" x2="500" y2="100" stroke="#e74c3c" stroke-width="3" stroke-linecap="round" />
-        <circle cx="500" cy="500" r="10" fill="#111" />
+        <line id="hour-hand" x1="500" y1="500" x2="500" y2="280" stroke="#111" stroke-width="14" stroke-linecap="round" />
+        <line id="minute-hand" x1="500" y1="500" x2="500" y2="150" stroke="#111" stroke-width="10" stroke-linecap="round" />
+        <line id="second-hand" x1="500" y1="550" x2="500" y2="80" stroke="#ff4757" stroke-width="4" stroke-linecap="round" />
+        <circle cx="500" cy="500" r="12" fill="#111" />
     </g>
 </svg>
 
@@ -38,21 +45,23 @@
     const ticksG = document.getElementById('ticks');
     const numsG = document.getElementById('numbers');
 
-    // 1. 秒ドット（60個）の生成
+    // 1. 秒ドット（60個）
     for (let i = 0; i < 60; i++) {
         const angle = (i * 6) * (Math.PI / 180);
-        const x = 500 + 470 * Math.sin(angle);
-        const y = 500 - 470 * Math.cos(angle);
+        const x = 500 + 475 * Math.sin(angle);
+        const y = 500 - 475 * Math.cos(angle);
         const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         dot.setAttribute("cx", x);
         dot.setAttribute("cy", y);
-        dot.setAttribute("r", i % 5 === 0 ? "4" : "2");
+        dot.setAttribute("r", i % 5 === 0 ? "6" : "3");
         dot.setAttribute("class", "second-dot");
+        // 背景色に応じてドットの色を変える（視認性確保）
+        dot.setAttribute("fill", i > 15 && i < 45 ? "#001F3F" : "#FFFFFF");
         dot.id = `dot-${i}`;
         ticksG.appendChild(dot);
     }
 
-    // 2. 24時間数字の配置（3時=6, 6時=9, 12時=18...の24時間計配置を正確に）
+    // 2. 24時間数字（1-24）
     for (let i = 1; i <= 24; i++) {
         const angle = (i * 15) * (Math.PI / 180);
         const x = 500 + 410 * Math.sin(angle);
@@ -62,15 +71,12 @@
         t.setAttribute("y", y);
         t.setAttribute("text-anchor", "middle");
         t.setAttribute("dominant-baseline", "central");
-        t.setAttribute("font-size", "36");
-        t.setAttribute("font-weight", "bold");
-        // 上半分(19-24, 1-6)は白、下半分(7-18)はネイビー
+        t.setAttribute("font-size", "42");
+        // 上半分は白、下半分はネイビーで視認性を固定
         t.setAttribute("fill", (i <= 6 || i >= 19) ? "#FFFFFF" : "#001F3F");
         t.textContent = i;
         numsG.appendChild(t);
     }
-
-    let lastSec = -1;
 
     function update() {
         const now = new Date();
@@ -78,7 +84,6 @@
         const m = now.getMinutes();
         const h = now.getHours();
 
-        // 針の回転計算（24時間計）
         const sDeg = s * 6;
         const mDeg = (m * 6) + (s * 0.1);
         const hDeg = (h % 24 * 15) + (m * 0.25);
@@ -87,15 +92,18 @@
         document.getElementById('minute-hand').setAttribute("transform", `rotate(${mDeg} 500 500)`);
         document.getElementById('hour-hand').setAttribute("transform", `rotate(${hDeg} 500 500)`);
 
-        // 秒ドットのアクティブ化
-        if (s !== lastSec) {
-            document.querySelectorAll('.second-dot').forEach(d => d.classList.remove('active'));
-            document.getElementById(`dot-${s}`).classList.add('active');
-            lastSec = s;
-        }
+        // アクティブな秒ドットの強調
+        document.querySelectorAll('.second-dot').forEach((d, idx) => {
+            if (idx === s) {
+                d.setAttribute("fill", "#ff4757");
+                d.setAttribute("r", "8");
+            } else {
+                d.setAttribute("fill", idx > 15 && idx < 45 ? "#001F3F" : "#FFFFFF");
+                d.setAttribute("r", idx % 5 === 0 ? "6" : "3");
+            }
+        });
     }
 
-    // 1秒ごとの正確な更新（チクタク）
     setInterval(update, 1000);
     update();
 </script>
