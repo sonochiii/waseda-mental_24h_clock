@@ -5,55 +5,99 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; }
-        svg { width: 90vmin; height: 90vmin; font-family: 'M PLUS Rounded 1c', sans-serif; }
-        .dot { fill-opacity: 1; }
-        #sec-h { transition: transform 0.1s cubic-bezier(0.4, 2.0, 0.5, 1); }
+        svg { width: 92vmin; height: 92vmin; font-family: 'M PLUS Rounded 1c', sans-serif; }
+        
+        /* 数字の視認性を極限まで高める設定 */
+        .clock-number {
+            font-size: 52px;
+            paint-order: stroke;
+            stroke-width: 6px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        
+        /* 秒針の動きをチクタクさせる */
+        #sec-h { transition: transform 0.1s cubic-bezier(0.4, 2.1, 0.5, 1); }
     </style>
 </head>
 <body>
 <svg viewBox="0 0 1000 1000">
     <defs>
-        <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="bg-grad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="50%" stop-color="#3E2723" /> <stop offset="50%" stop-color="#FFF9E3" /> </linearGradient>
     </defs>
-    <circle cx="500" cy="500" r="495" fill="url(#g)" stroke="#2D1B18" stroke-width="4"/>
-    <text x="500" y="700" text-anchor="middle" font-size="40" fill="#3E2723">早稲田メンタルクリニック</text>
-    <g id="dots"></g>
-    <g id="nums"></g>
+
+    <circle cx="500" cy="500" r="490" fill="url(#bg-grad)" stroke="#2D1B18" stroke-width="6"/>
+
+    <text x="500" y="720" text-anchor="middle" font-size="36" fill="#3E2723" opacity="0.9">早稲田メンタルクリニック</text>
+
+    <g id="dots-container"></g>
+    <g id="nums-container"></g>
+
     <g id="hands">
         <line id="hour-h" x1="500" y1="500" x2="500" y2="300" stroke="#2D1B18" stroke-width="14" stroke-linecap="round" />
         <line id="min-h" x1="500" y1="500" x2="500" y2="180" stroke="#2D1B18" stroke-width="10" stroke-linecap="round" />
-        <line id="sec-h" x1="500" y1="550" x2="500" y2="100" stroke="#D4AF37" stroke-width="4" stroke-linecap="round" /> <circle cx="500" cy="500" r="12" fill="#2D1B18" />
+        
+        <line id="sec-h" x1="500" y1="540" x2="500" y2="80" stroke="#D4AF37" stroke-width="4" stroke-linecap="round" />
+        
+        <circle cx="500" cy="500" r="12" fill="#2D1B18" />
+        <circle cx="500" cy="500" r="5" fill="#D4AF37" />
     </g>
 </svg>
+
 <script>
-    const dG = document.getElementById('dots'), nG = document.getElementById('nums');
+    const dG = document.getElementById('dots-container'), nG = document.getElementById('nums-container');
+
+    // 1. 秒ドットの配置
     for (let i = 0; i < 60; i++) {
-        const a = i * 6 * Math.PI / 180, x = 500 + 475 * Math.sin(a), y = 500 - 475 * Math.cos(a);
+        const a = i * 6 * Math.PI / 180, x = 500 + 465 * Math.sin(a), y = 500 - 465 * Math.cos(a);
         const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", i % 5 === 0 ? "7" : "3");
-        c.setAttribute("fill", (i > 15 && i < 45) ? "#3E2723" : "#FFFFFF");
-        c.id = `d-${i}`; dG.appendChild(c);
+        c.setAttribute("cx", x); c.setAttribute("cy", y);
+        c.setAttribute("r", i % 5 === 0 ? "6" : "3");
+        c.setAttribute("fill", (i > 15 && i < 45) ? "#3E2723" : "#FFF9E3");
+        c.id = `dot-${i}`;
+        dG.appendChild(c);
     }
+
+    // 2. 24時間数字の配置
     for (let i = 1; i <= 24; i++) {
-        const a = i * 15 * Math.PI / 180, x = 500 + 410 * Math.sin(a), y = 500 - 410 * Math.cos(a);
+        const a = i * 15 * Math.PI / 180, x = 500 + 390 * Math.sin(a), y = 500 - 390 * Math.cos(a);
         const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        t.setAttribute("x", x); t.setAttribute("y", y); t.setAttribute("text-anchor", "middle");
-        t.setAttribute("dominant-baseline", "central"); t.setAttribute("font-size", "45");
-        t.setAttribute("fill", (i <= 6 || i >= 19) ? "#FFFFFF" : "#3E2723");
-        t.textContent = i; nG.appendChild(t);
+        t.setAttribute("x", x); t.setAttribute("y", y);
+        t.setAttribute("text-anchor", "middle");
+        t.setAttribute("dominant-baseline", "central");
+        t.setAttribute("class", "clock-number");
+        
+        // 色と縁取りの設定（視認性向上）
+        const isTop = (i <= 6 || i >= 19);
+        t.setAttribute("fill", isTop ? "#FFF9E3" : "#3E2723");
+        t.setAttribute("stroke", isTop ? "#3E2723" : "#FFF9E3");
+        
+        t.textContent = i;
+        nG.appendChild(t);
     }
-    function up() {
+
+    function update() {
         const d = new Date(), s = d.getSeconds(), m = d.getMinutes(), h = d.getHours();
+        
+        // 回転計算
         document.getElementById('sec-h').setAttribute("transform", `rotate(${s*6} 500 500)`);
-        document.getElementById('min-h').setAttribute("transform", `rotate(${m*6+s*0.1} 500 500)`);
-        document.getElementById('hour-h').setAttribute("transform", `rotate(${(h%24)*15+m*0.25} 500 500)`);
-        document.querySelectorAll('circle[id^="d-"]').forEach((dot, j) => {
-            dot.setAttribute("fill", j === s ? "#D4AF37" : (j > 15 && j < 45 ? "#3E2723" : "#FFFFFF"));
-            if(j === s) dot.setAttribute("r", "10"); else dot.setAttribute("r", j % 5 === 0 ? "7" : "3");
-        });
+        document.getElementById('min-h').setAttribute("transform", `rotate(${m*6 + s*0.1} 500 500)`);
+        document.getElementById('hour-h').setAttribute("transform", `rotate(${(h%24)*15 + m*0.25} 500 500)`);
+
+        // ドットの強調表示
+        for(let i=0; i<60; i++){
+            const dot = document.getElementById(`dot-${i}`);
+            if(i === s) {
+                dot.setAttribute("fill", "#D4AF37");
+                dot.setAttribute("r", "10");
+            } else {
+                dot.setAttribute("fill", (i > 15 && i < 45) ? "#3E2723" : "#FFF9E3");
+                dot.setAttribute("r", i % 5 === 0 ? "6" : "3");
+            }
+        }
     }
-    setInterval(up, 1000); up();
+    setInterval(update, 1000); update();
 </script>
 </body>
 </html>
