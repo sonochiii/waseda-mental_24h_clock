@@ -2,22 +2,25 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <title>Waseda Mental Clinic - Precise 24H Clock</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
-        body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; }
+        body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
         svg { width: 92vmin; height: 92vmin; font-family: 'M PLUS Rounded 1c', sans-serif; }
         
-        /* 数字の視認性を極限まで高める設定 */
+        /* 数字の視認性を極限まで高める（縁取り） */
         .clock-number {
-            font-size: 52px;
+            font-size: 55px;
             paint-order: stroke;
             stroke-width: 6px;
             stroke-linecap: round;
             stroke-linejoin: round;
         }
-        
-        /* 秒針の動きをチクタクさせる */
-        #sec-h { transition: transform 0.1s cubic-bezier(0.4, 2.1, 0.5, 1); }
+
+        /* 迷いのあるブレ（transition）を完全に削除。1秒ごとに即座に切り替わる設定 */
+        #sec-h, #min-h, #hour-h {
+            transition: none !important;
+        }
     </style>
 </head>
 <body>
@@ -27,77 +30,72 @@
             <stop offset="50%" stop-color="#3E2723" /> <stop offset="50%" stop-color="#FFF9E3" /> </linearGradient>
     </defs>
 
-    <circle cx="500" cy="500" r="490" fill="url(#bg-grad)" stroke="#2D1B18" stroke-width="6"/>
+    <circle cx="500" cy="500" r="495" fill="url(#bg-grad)" stroke="#2D1B18" stroke-width="6"/>
 
-    <text x="500" y="720" text-anchor="middle" font-size="36" fill="#3E2723" opacity="0.9">早稲田メンタルクリニック</text>
+    <text x="500" y="720" text-anchor="middle" font-size="38" fill="#3E2723" opacity="0.9">早稲田メンタルクリニック</text>
 
     <g id="dots-container"></g>
     <g id="nums-container"></g>
 
     <g id="hands">
-        <line id="hour-h" x1="500" y1="500" x2="500" y2="300" stroke="#2D1B18" stroke-width="14" stroke-linecap="round" />
-        <line id="min-h" x1="500" y1="500" x2="500" y2="180" stroke="#2D1B18" stroke-width="10" stroke-linecap="round" />
-        
-        <line id="sec-h" x1="500" y1="540" x2="500" y2="80" stroke="#D4AF37" stroke-width="4" stroke-linecap="round" />
-        
-        <circle cx="500" cy="500" r="12" fill="#2D1B18" />
-        <circle cx="500" cy="500" r="5" fill="#D4AF37" />
+        <line id="hour-h" x1="500" y1="500" x2="500" y2="300" stroke="#111" stroke-width="15" stroke-linecap="round" />
+        <line id="min-h" x1="500" y1="500" x2="500" y2="160" stroke="#111" stroke-width="10" stroke-linecap="round" />
+        <line id="sec-h" x1="500" y1="550" x2="500" y2="90" stroke="#D4AF37" stroke-width="4" stroke-linecap="round" />
+        <circle cx="500" cy="500" r="14" fill="#111" />
+        <circle cx="500" cy="500" r="6" fill="#D4AF37" />
     </g>
 </svg>
 
 <script>
     const dG = document.getElementById('dots-container'), nG = document.getElementById('nums-container');
 
-    // 1. 秒ドットの配置
+    // 1. 秒ドット：位置のズレをなくすため半径を厳密に設定
     for (let i = 0; i < 60; i++) {
-        const a = i * 6 * Math.PI / 180, x = 500 + 465 * Math.sin(a), y = 500 - 465 * Math.cos(a);
+        const a = i * 6 * Math.PI / 180;
+        const x = 500 + 465 * Math.sin(a);
+        const y = 500 - 465 * Math.cos(a);
         const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         c.setAttribute("cx", x); c.setAttribute("cy", y);
-        c.setAttribute("r", i % 5 === 0 ? "6" : "3");
+        c.setAttribute("r", i % 5 === 0 ? "7" : "3");
+        // 背景色に合わせた固定色（白または焦茶）
         c.setAttribute("fill", (i > 15 && i < 45) ? "#3E2723" : "#FFF9E3");
-        c.id = `dot-${i}`;
         dG.appendChild(c);
     }
 
-    // 2. 24時間数字の配置
+    // 2. 24時間数字：配置
     for (let i = 1; i <= 24; i++) {
-        const a = i * 15 * Math.PI / 180, x = 500 + 390 * Math.sin(a), y = 500 - 390 * Math.cos(a);
+        const a = i * 15 * Math.PI / 180;
+        const x = 500 + 380 * Math.sin(a);
+        const y = 500 - 380 * Math.cos(a);
         const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
         t.setAttribute("x", x); t.setAttribute("y", y);
         t.setAttribute("text-anchor", "middle");
         t.setAttribute("dominant-baseline", "central");
         t.setAttribute("class", "clock-number");
         
-        // 色と縁取りの設定（視認性向上）
         const isTop = (i <= 6 || i >= 19);
         t.setAttribute("fill", isTop ? "#FFF9E3" : "#3E2723");
-        t.setAttribute("stroke", isTop ? "#3E2723" : "#FFF9E3");
+        t.setAttribute("stroke", isTop ? "#3E2723" : "#FFF9E3"); // 縁取りで視認性確保
         
         t.textContent = i;
         nG.appendChild(t);
     }
 
+    // 3. 更新関数：ブレ（Lerp）を排除した絶対配置
     function update() {
-        const d = new Date(), s = d.getSeconds(), m = d.getMinutes(), h = d.getHours();
-        
-        // 回転計算
-        document.getElementById('sec-h').setAttribute("transform", `rotate(${s*6} 500 500)`);
-        document.getElementById('min-h').setAttribute("transform", `rotate(${m*6 + s*0.1} 500 500)`);
-        document.getElementById('hour-h').setAttribute("transform", `rotate(${(h%24)*15 + m*0.25} 500 500)`);
+        const now = new Date();
+        const s = now.getSeconds();
+        const m = now.getMinutes();
+        const h = now.getHours();
 
-        // ドットの強調表示
-        for(let i=0; i<60; i++){
-            const dot = document.getElementById(`dot-${i}`);
-            if(i === s) {
-                dot.setAttribute("fill", "#D4AF37");
-                dot.setAttribute("r", "10");
-            } else {
-                dot.setAttribute("fill", (i > 15 && i < 45) ? "#3E2723" : "#FFF9E3");
-                dot.setAttribute("r", i % 5 === 0 ? "6" : "3");
-            }
-        }
+        // 角度をダイレクトに反映
+        document.getElementById('sec-h').setAttribute("transform", `rotate(${s * 6} 500 500)`);
+        document.getElementById('min-h').setAttribute("transform", `rotate(${m * 6 + s * 0.1} 500 500)`);
+        document.getElementById('hour-h').setAttribute("transform", `rotate(${(h % 24) * 15 + m * 0.25} 500 500)`);
     }
-    setInterval(update, 1000); update();
+
+    setInterval(update, 1000);
+    update(); // 初期表示
 </script>
 </body>
 </html>
