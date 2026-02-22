@@ -2,41 +2,41 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Waseda Mental Clinic - 24H Clock</title>
     <style>
-        body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #e0e0e0; }
-        svg { width: 80vmin; height: 80vmin; background: white; border-radius: 50%; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #333; }
+        svg { width: 90vmin; height: 90vmin; }
+        text { font-family: sans-serif; font-weight: bold; }
+        /* 秒針のステップ運針用のアニメーション */
+        #second-hand { transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     </style>
 </head>
 <body>
 
 <svg viewBox="0 0 1000 1000">
     <defs>
-        <linearGradient id="dialGrad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
             <stop offset="50%" stop-color="#001F3F" /> <stop offset="50%" stop-color="#F5F5DC" /> </linearGradient>
     </defs>
-
-    <circle cx="500" cy="500" r="490" fill="url(#dialGrad)" stroke="#333" stroke-width="5"/>
     
-    <text x="500" y="300" text-anchor="middle" font-size="40" font-weight="bold" fill="rgba(255,255,255,0.7)">早稲田メンタルクリニック</text>
+    <circle cx="500" cy="500" r="490" fill="url(#bg)" stroke="#222" stroke-width="4"/>
+    <text x="500" y="320" text-anchor="middle" font-size="42" fill="rgba(255,255,255,0.7)">早稲田メンタルクリニック</text>
 
     <g id="numbers"></g>
 
-    <g id="hands">
-        <line id="hour" x1="500" y1="500" x2="500" y2="280" stroke="#333" stroke-width="12" stroke-linecap="round" />
-        <line id="min" x1="500" y1="500" x2="500" y2="180" stroke="#333" stroke-width="8" stroke-linecap="round" />
-        <line id="sec" x1="500" y1="550" x2="500" y2="120" stroke="#E74C3C" stroke-width="4" stroke-linecap="round" />
-        <circle cx="500" cy="500" r="15" fill="#333" />
-    </g>
+    <line id="hour-hand" x1="500" y1="500" x2="500" y2="280" stroke="#111" stroke-width="14" stroke-linecap="round" />
+    <line id="minute-hand" x1="500" y1="500" x2="500" y2="160" stroke="#111" stroke-width="10" stroke-linecap="round" />
+    <line id="second-hand" x1="500" y1="560" x2="500" y2="100" stroke="#d63031" stroke-width="4" stroke-linecap="round" />
+    <circle cx="500" cy="500" r="12" fill="#111" />
 </svg>
 
 <script>
-    const numGroup = document.getElementById('numbers');
+    const numG = document.getElementById('numbers');
     
-    // 1. 24時間の数字を動的に配置
+    // 24時間の配置（15度刻み）
     for (let i = 1; i <= 24; i++) {
-        const angle = (i * 15) * (Math.PI / 180); // 1時間 = 15度
-        const x = 500 + 410 * Math.sin(angle); // 0度が真上になるようsin/cosを調整
+        // 数学的にi=24が真上にくるように調整
+        const angle = (i * 15) * (Math.PI / 180);
+        const x = 500 + 410 * Math.sin(angle);
         const y = 500 - 410 * Math.cos(angle);
 
         const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -44,35 +44,33 @@
         t.setAttribute("y", y);
         t.setAttribute("text-anchor", "middle");
         t.setAttribute("dominant-baseline", "central");
-        t.setAttribute("font-size", "38");
-        t.setAttribute("font-weight", "bold");
-        // 背景色に応じた文字色（上半分：白 / 下半分：黒）
-        t.setAttribute("fill", (i <= 6 || i >= 19) ? "#FFFFFF" : "#333");
+        t.setAttribute("font-size", "36");
+        // 上半分(1-6, 19-24)は白、下半分(7-18)は濃色
+        t.setAttribute("fill", (i <= 6 || i >= 19) ? "#FFF" : "#001F3F");
         t.textContent = i;
-        numGroup.appendChild(t);
+        numG.appendChild(t);
     }
 
-    // 2. 時計を動かす関数
-    function tick() {
-        const now = new Date();
-        const h = now.getHours();
-        const m = now.getMinutes();
-        const s = now.getSeconds();
+    function update() {
+        const d = new Date();
+        const s = d.getSeconds();
+        const m = d.getMinutes();
+        const h = d.getHours() % 24;
 
-        // 角度計算
-        const sDeg = s * 6;           // 1秒 = 6度
-        const mDeg = m * 6 + s * 0.1; // 1分 = 6度
-        const hDeg = (h % 24) * 15 + m * 0.25; // 24時間計：1時間 = 15度
+        // 秒針：1秒で6度 (360/60)
+        const sDeg = s * 6;
+        // 分針：1分で6度 + 秒による微調整
+        const mDeg = (m * 6) + (s * 0.1);
+        // 時針：24時間計なので1時間で15度 (360/24) + 分による微調整
+        const hDeg = (h * 15) + (m * 0.25);
 
-        document.getElementById('sec').setAttribute("transform", `rotate(${sDeg} 500 500)`);
-        document.getElementById('min').setAttribute("transform", `rotate(${mDeg} 500 500)`);
-        document.getElementById('hour').setAttribute("transform", `rotate(${hDeg} 500 500)`);
+        document.getElementById('second-hand').setAttribute("transform", `rotate(${sDeg} 500 500)`);
+        document.getElementById('minute-hand').setAttribute("transform", `rotate(${mDeg} 500 500)`);
+        document.getElementById('hour-hand').setAttribute("transform", `rotate(${hDeg} 500 500)`);
     }
 
-    // 1秒ごとに実行（チクタク運針）
-    setInterval(tick, 1000);
-    tick(); // 初回実行
+    setInterval(update, 1000);
+    update();
 </script>
-
 </body>
 </html>
