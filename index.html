@@ -2,13 +2,24 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <style>
+  <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
         svg { width: 92vmin; height: 92vmin; font-family: 'M PLUS Rounded 1c', sans-serif; }
         
-        /* 針のアニメーションを完全排除（ブレ防止） */
-        line, circle { transition: none !important; }
+        /* 数字の視認性を極限まで高める（縁取り） */
+        .clock-number {
+            font-size: 55px;
+            paint-order: stroke;
+            stroke-width: 6px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* 迷いのあるブレ（transition）を完全に削除。1秒ごとに即座に切り替わる設定 */
+        #sec-h, #min-h, #hour-h {
+            transition: none !important;
+        }
     </style>
 </head>
 <body>
