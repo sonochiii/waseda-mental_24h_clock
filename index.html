@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Waseda Mental Clinic - 24H Clock</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        svg {
+            width: 90vmin;
+            height: 90vmin;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+        }
+        /* 秒針のチクタク感を出すためのスタイル */
+        #second-hand {
+            transition: transform 0.1s cubic-bezier(0.4, 2.08, 0.55, 0.44);
+        }
+    </style>
+</head>
+<body>
+
+<svg viewBox="0 0 1000 1000">
+    <defs>
+        <linearGradient id="dialGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="50%" stop-color="#001F3F" />
+            <stop offset="50%" stop-color="#F5F5DC" />
+        </linearGradient>
+        
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+            <feOffset dx="2" dy="2" />
+            <feComposite in2="SourceAlpha" operator="out" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.3 0" />
+        </filter>
+    </defs>
+
+    <circle cx="500" cy="500" r="480" fill="url(#dialGradient)" stroke="#333" stroke-width="10"/>
+    
+    <text x="500" y="350" text-anchor="middle" font-size="42" font-weight="bold" fill="rgba(255,255,255,0.8)">早稲田メンタルクリニック</text>
+
+    <g id="clock-face"></g>
+
+    <line id="hour-hand" x1="500" y1="500" x2="500" y2="250" stroke="#333" stroke-width="12" stroke-linecap="round" filter="url(#shadow)" />
+    <line id="minute-hand" x1="500" y1="500" x2="500" y2="150" stroke="#333" stroke-width="8" stroke-linecap="round" filter="url(#shadow)" />
+    <line id="second-hand" x1="500" y1="550" x2="500" y2="120" stroke="#E74C3C" stroke-width="4" stroke-linecap="round" filter="url(#shadow)" />
+    <circle cx="500" cy="500" r="15" fill="#333" />
+</svg>
+
+<script>
+const face = document.getElementById('clock-face');
+
+// 24時間の数字配置
+for (let i = 1; i <= 24; i++) {
+    // 24時間計：1時間あたり15度 (360/24)
+    // -90度(真上)からスタートして時計回りに配置
+    const angleDeg = (i * 15) - 90;
+    const angleRad = angleDeg * (Math.PI / 180);
+    const radius = 400;
+    
+    const x = 500 + radius * Math.cos(angleRad);
+    const y = 500 + radius * Math.sin(angleRad);
+
+    const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    t.setAttribute("x", x);
+    t.setAttribute("y", y);
+    t.setAttribute("text-anchor", "middle");
+    t.setAttribute("dominant-baseline", "central");
+    t.setAttribute("font-size", "35");
+    t.setAttribute("font-weight", "600");
+    // 上半分(1-6, 19-24)は白、下半分(7-18)は濃紺
+    t.setAttribute("fill", (i <= 6 || i >= 19) ? "#FFFFFF" : "#001F3F");
+    t.textContent = i;
+    face.appendChild(t);
+}
+
+function update() {
+    const now = new Date();
+    const h = now.getHours();
+    const m = now.getMinutes();
+    const s = now.getSeconds();
+
+    // 24時間計の計算
+    const hDeg = (h * 15) + (m * 0.25) - 90;
+    const mDeg = (m * 6) - 90;
+    const sDeg = (s * 6) - 90;
+
+    document.getElementById('hour-hand').setAttribute("transform", `rotate(${hDeg+90}, 500, 500)`);
+    document.getElementById('minute-hand').setAttribute("transform", `rotate(${mDeg+90}, 500, 500)`);
+    document.getElementById('second-hand').setAttribute("transform", `rotate(${sDeg+90}, 500, 500)`);
+}
+
+// 1秒ごとに更新（チクタク刻む）
+setInterval(update, 1000);
+update();
+</script>
+
+</body>
+</html>
