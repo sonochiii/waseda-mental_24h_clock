@@ -2,13 +2,21 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <title>Waseda Mental Clinic - Precise 24H Management Clock</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@800&display=swap');
+        
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
         svg { width: 92vmin; height: 92vmin; font-family: 'M PLUS Rounded 1c', sans-serif; }
         
-        /* 針のアニメーションを完全排除（ブレ防止） */
-        line, circle { transition: none !important; }
+        /* 数字の視認性を物理的に確保するための影 */
+        .clock-number {
+            font-size: 58px; /* 最大限大きく */
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.4));
+        }
+
+        /* アニメーション、ブレ、余計な動きを完全禁止 */
+        * { transition: none !important; }
     </style>
 </head>
 <body>
@@ -20,63 +28,11 @@
 
     <circle cx="500" cy="500" r="495" fill="url(#bg-grad)" stroke="#2D1B18" stroke-width="4"/>
 
-    <text x="500" y="700" text-anchor="middle" font-size="34" fill="#3E2723" opacity="0.8">早稲田メンタルクリニック</text>
+    <text x="500" y="720" text-anchor="middle" font-size="34" fill="#3E2723" font-weight="bold">早稲田メンタルクリニック</text>
 
     <g id="dots-container"></g>
     <g id="nums-container"></g>
 
     <g id="hands">
-        <line id="hour-h" x1="500" y1="500" x2="500" y2="300" stroke="#2D1B18" stroke-width="15" stroke-linecap="round" />
-        <line id="min-h" x1="500" y1="500" x2="500" y2="160" stroke="#2D1B18" stroke-width="10" stroke-linecap="round" />
-        <line id="sec-h" x1="500" y1="530" x2="500" y2="80" stroke="#D4AF37" stroke-width="4" stroke-linecap="round" />
-        <circle cx="500" cy="500" r="14" fill="#2D1B18" />
-        <circle cx="500" cy="500" r="6" fill="#D4AF37" />
-    </g>
-</svg>
-
-<script>
-    const dG = document.getElementById('dots-container'), nG = document.getElementById('nums-container');
-
-    // 1. 秒ドット：背景色と対比させて配置
-    for (let i = 0; i < 60; i++) {
-        const a = i * 6 * Math.PI / 180;
-        const x = 500 + 470 * Math.sin(a), y = 500 - 470 * Math.cos(a);
-        const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        c.setAttribute("cx", x); c.setAttribute("cy", y);
-        c.setAttribute("r", i % 5 === 0 ? "6" : "2.5");
-        // 上半分はアイボリー（白系）、下半分は焦茶色で配置
-        c.setAttribute("fill", (i > 15 && i < 45) ? "#3E2723" : "#FFF9E3");
-        dG.appendChild(c);
-    }
-
-    // 2. 24時間数字：装飾を排除し読みやすさを最大化
-    for (let i = 1; i <= 24; i++) {
-        const a = i * 15 * Math.PI / 180;
-        const x = 500 + 395 * Math.sin(a), y = 500 - 395 * Math.cos(a);
-        const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        t.setAttribute("x", x); t.setAttribute("y", y);
-        t.setAttribute("text-anchor", "middle");
-        t.setAttribute("dominant-baseline", "central");
-        t.setAttribute("font-size", "48"); // 視認性が高く、かつ重ならない最適サイズ
-        
-        // 背景色に応じて完全に色を反転
-        const isTop = (i <= 6 || i >= 19);
-        t.setAttribute("fill", isTop ? "#FFF9E3" : "#3E2723");
-        
-        t.textContent = i;
-        nG.appendChild(t);
-    }
-
-    // 3. 更新関数：1秒ごとにパシッと位置を更新
-    function update() {
-        const now = new Date();
-        const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
-        document.getElementById('sec-h').setAttribute("transform", `rotate(${s * 6} 500 500)`);
-        document.getElementById('min-h').setAttribute("transform", `rotate(${m * 6 + s * 0.1} 500 500)`);
-        document.getElementById('hour-h').setAttribute("transform", `rotate(${(h % 24) * 15 + m * 0.25} 500 500)`);
-    }
-
-    setInterval(update, 1000); update();
-</script>
-</body>
-</html>
+        <line id="hour-h" x1="500" y1="500" x2="500" y2="300" stroke="#111" stroke-width="15" stroke-linecap="round" />
+        <line id="min-h" x1="500" y1="500" x2="500" y2="160" stroke="#111" stroke-width="10" stroke
