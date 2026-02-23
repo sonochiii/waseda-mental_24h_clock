@@ -2,17 +2,22 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Waseda Mental Clinic - Final Absolute Stable Clock</title>
+    <title>Waseda Mental Clinic - The Harmonious 24H Clock</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
         svg { width: 92vmin; height: 92vmin; font-family: 'M PLUS Rounded 1c', sans-serif; }
         
+        /* --------------------------------------------------
+           数字とドットの視認性設定
+        -------------------------------------------------- */
         .clock-number {
             font-size: 58px; font-weight: 800; paint-order: stroke;
             stroke-width: 8px; stroke-linecap: round; stroke-linejoin: round;
         }
         .clock-dot { paint-order: stroke; stroke-width: 2px; }
+
+        /* 針：カチカチとした正確なステップ運針を維持 */
         #sec-g, #min-h, #hour-h { transition: none !important; }
     </style>
 </head>
@@ -29,7 +34,7 @@
     <g id="nums-container"></g>
 
     <g id="hands">
-        <line id="hour-h" x1="500" y1="500" x2="500" y2="280" stroke="#C0C0C0" stroke-width="16" stroke-linecap="round" />
+        <line id="hour-h" x1="500" y1="500" x2="500" y2="270" stroke="#C0C0C0" stroke-width="16" stroke-linecap="round" />
         
         <line id="min-h" x1="500" y1="500" x2="500" y2="145" stroke="#C0C0C0" stroke-width="11" stroke-linecap="round" />
         
@@ -48,7 +53,7 @@
 <script>
     const dG = document.getElementById('dots-container'), nG = document.getElementById('nums-container');
 
-    // 1. 外周ドット（半径465）
+    // 外周ドットの配置（半径465）
     for (let i = 0; i < 60; i++) {
         const a = i * 6 * Math.PI / 180;
         const x = 500 + 465 * Math.sin(a), y = 500 - 465 * Math.cos(a);
@@ -62,7 +67,7 @@
         dG.appendChild(c);
     }
 
-    // 2. 24時間数字（半径395）
+    // 24時間数字の配置（半径395）
     for (let i = 1; i <= 24; i++) {
         const a = i * 15 * Math.PI / 180;
         const x = 500 + 395 * Math.sin(a), y = 500 - 395 * Math.cos(a);
@@ -78,23 +83,23 @@
         nG.appendChild(t);
     }
 
-    // 3. 運針ロジック
+    // 運針更新ロジック
     function update() {
         const now = new Date();
         const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
-        // 秒針グループ(sec-g)を回すことで、後ろの飾りも連動
         document.getElementById('sec-g').setAttribute("transform", `rotate(${s * 6} 500 500)`);
         document.getElementById('min-h').setAttribute("transform", `rotate(${m * 6 + s * 0.1} 500 500)`);
         document.getElementById('hour-h').setAttribute("transform", `rotate(${(h % 24) * 15 + m * 0.25} 500 500)`);
     }
     setInterval(update, 1000); update();
 
-    /* * 人間用メモ：
-     * 時針の長さ：#hour-h の y2 (280)
-     * 分針の長さ：#min-h の y2 (145)
-     * 秒針の長さ：#sec-g内 最初のlineの y2 (48)
-     * 秒針の後ろ：#sec-g内 二番目のlineの y2 (540)
-     */
+    /* --------------------------------------------------
+     * 人間のための贈り物：メンテナンスガイド
+     * 1. 時針（短針）の長さ調整： hour-h の y2 値を増減（現在は270）
+     * 2. 分針（長針）の長さ調整： min-h の y2 値を増減（現在は145）
+     * 3. 秒針の長さ調整： sec-g 内の最初の line の y2 値（現在は48）
+     * 4. ロゴの高さ： text 要素の y 値（現在は720）
+     * -------------------------------------------------- */
 </script>
 </body>
 </html>
