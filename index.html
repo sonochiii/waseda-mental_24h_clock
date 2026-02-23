@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Waseda Mental Clinic - Precise 24H Clock</title>
+    <title>Waseda Mental Clinic - High Visibility 24H Clock</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
@@ -13,12 +13,12 @@
             font-size: 58px;
             font-weight: 800;
             paint-order: stroke;
-            stroke-width: 8px; /* 縁取りをさらに強化 */
+            stroke-width: 8px;
             stroke-linecap: round;
             stroke-linejoin: round;
         }
 
-        /* 迷いのあるブレを完全に排除 */
+        /* 針のアニメーション（ブレ）を完全排除 */
         #sec-h, #min-h, #hour-h {
             transition: none !important;
         }
@@ -28,10 +28,10 @@
 <svg viewBox="0 0 1000 1000">
     <defs>
         <linearGradient id="bg-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="50%" stop-color="#3E2723" /> <stop offset="50%" stop-color="#FFF9E3" /> </linearGradient>
+            <stop offset="50%" stop-color="#5D4037" /> <stop offset="50%" stop-color="#FFF9E3" /> </linearGradient>
     </defs>
 
-    <circle cx="500" cy="500" r="495" fill="url(#bg-grad)" stroke="#2D1B18" stroke-width="6"/>
+    <circle cx="500" cy="500" r="495" fill="url(#bg-grad)" stroke="#3E2723" stroke-width="6"/>
 
     <text x="500" y="720" text-anchor="middle" font-size="38" fill="#3E2723" font-weight="bold">早稲田メンタルクリニック</text>
 
@@ -39,29 +39,29 @@
     <g id="nums-container"></g>
 
     <g id="hands">
-        <line id="hour-h" x1="500" y1="500" x2="500" y2="300" stroke="#1A1A1A" stroke-width="15" stroke-linecap="round" />
-        <line id="min-h" x1="500" y1="500" x2="500" y2="160" stroke="#1A1A1A" stroke-width="10" stroke-linecap="round" />
-        <line id="sec-h" x1="500" y1="540" x2="500" y2="90" stroke="#D4AF37" stroke-width="4" stroke-linecap="round" />
-        <circle cx="500" cy="500" r="14" fill="#1A1A1A" />
-        <circle cx="500" cy="500" r="6" fill="#D4AF37" />
+        <line id="hour-h" x1="500" y1="500" x2="500" y2="300" stroke="#C0C0C0" stroke-width="16" stroke-linecap="round" />
+        <line id="min-h" x1="500" y1="500" x2="500" y2="160" stroke="#C0C0C0" stroke-width="11" stroke-linecap="round" />
+        <line id="sec-h" x1="500" y1="540" x2="500" y2="90" stroke="#E0E0E0" stroke-width="4" stroke-linecap="round" />
+        <circle cx="500" cy="500" r="14" fill="#A0A0A0" />
+        <circle cx="500" cy="500" r="6" fill="#E0E0E0" />
     </g>
 </svg>
 
 <script>
     const dG = document.getElementById('dots-container'), nG = document.getElementById('nums-container');
 
-    // 1. 秒ドット（配置ミスを排除）
+    // 1. 秒ドット（配置ロジック厳守）
     for (let i = 0; i < 60; i++) {
         const a = i * 6 * Math.PI / 180;
         const x = 500 + 465 * Math.sin(a), y = 500 - 465 * Math.cos(a);
         const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         c.setAttribute("cx", x); c.setAttribute("cy", y);
-        c.setAttribute("r", i % 5 === 0 ? "7" : "3");
+        c.setAttribute("r", i % 5 === 0 ? "8" : "3.5");
         c.setAttribute("fill", (i > 15 && i < 45) ? "#3E2723" : "#FFF9E3");
         dG.appendChild(c);
     }
 
-    // 2. 24時間数字（反対色縁取りロジック）
+    // 2. 24時間数字（反対色縁取りロジック厳守）
     for (let i = 1; i <= 24; i++) {
         const a = i * 15 * Math.PI / 180;
         const x = 500 + 380 * Math.sin(a), y = 500 - 380 * Math.cos(a);
@@ -72,7 +72,6 @@
         t.setAttribute("class", "clock-number");
         
         const isTop = (i <= 6 || i >= 19);
-        // 背景色に対して文字色と縁取り色を交互に設定
         t.setAttribute("fill", isTop ? "#FFF9E3" : "#3E2723");
         t.setAttribute("stroke", isTop ? "#3E2723" : "#FFF9E3");
         
@@ -80,7 +79,7 @@
         nG.appendChild(t);
     }
 
-    // 3. 更新関数
+    // 3. 更新関数（正確なステップ運針）
     function update() {
         const now = new Date();
         const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
