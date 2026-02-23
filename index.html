@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Waseda Mental Clinic - The Ultimate 24H Clock</title>
+    <title>Waseda Mental Clinic - Human-Centric 24H Clock</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
@@ -44,8 +44,10 @@
 
     <g id="hands">
         <line id="hour-h" x1="500" y1="500" x2="500" y2="300" stroke="#C0C0C0" stroke-width="16" stroke-linecap="round" />
-        <line id="min-h" x1="500" y1="500" x2="500" y2="160" stroke="#C0C0C0" stroke-width="11" stroke-linecap="round" />
-        <line id="sec-h" x1="500" y1="540" x2="500" y2="87" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
+        
+        <line id="min-h" x1="500" y1="500" x2="500" y2="155" stroke="#C0C0C0" stroke-width="11" stroke-linecap="round" />
+        
+        <line id="sec-h" x1="500" y1="540" x2="500" y2="50" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
         
         <circle cx="500" cy="500" r="14" fill="#A0A0A0" />
         <circle cx="500" cy="500" r="6" fill="#FFD700" />
@@ -57,7 +59,10 @@
 <script>
     const dG = document.getElementById('dots-container'), nG = document.getElementById('nums-container');
 
-    // 1. 秒ドット（縁取りあり・60個）
+    /**
+     * 1. 外周ドットの生成
+     * 半径 465px の位置に配置。背景色に合わせて縁取りを反転。
+     */
     for (let i = 0; i < 60; i++) {
         const a = i * 6 * Math.PI / 180;
         const x = 500 + 465 * Math.sin(a), y = 500 - 465 * Math.cos(a);
@@ -71,7 +76,10 @@
         dG.appendChild(c);
     }
 
-    // 2. 24時間数字（縁取りあり・外周寄り配置395）
+    /**
+     * 2. 24時間数字の生成
+     * 半径 395px の位置に配置。針と重ならない「ベストバランス」を維持。
+     */
     for (let i = 1; i <= 24; i++) {
         const a = i * 15 * Math.PI / 180;
         const x = 500 + 395 * Math.sin(a), y = 500 - 395 * Math.cos(a);
@@ -87,21 +95,27 @@
         nG.appendChild(t);
     }
 
-    // 3. 時計の運針ロジック
+    /**
+     * 3. リアルタイム更新
+     * 1秒ごとに針の角度を計算し、ダイレクトに座標を更新。
+     */
     function update() {
         const now = new Date();
         const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
+        
+        // 秒針（360度 / 60秒 = 1秒あたり6度）
         document.getElementById('sec-h').setAttribute("transform", `rotate(${s * 6} 500 500)`);
+        // 分針（秒の進行も加味して滑らかに）
         document.getElementById('min-h').setAttribute("transform", `rotate(${m * 6 + s * 0.1} 500 500)`);
+        // 時針（24時間計のため 360度 / 24時間 = 1時間あたり15度）
         document.getElementById('hour-h').setAttribute("transform", `rotate(${(h % 24) * 15 + m * 0.25} 500 500)`);
     }
 
-    setInterval(update, 1000); update();
+    setInterval(update, 1000); 
+    update(); // 起動時に即時実行
 
-    // 最終メモ:
-    // - 長針到達点: y2="160"
-    // - 秒針到達点: y2="87"
-    // - ロゴ・数字・ドットの全ての視認性と重なり順を最適化。
-</script>
-</body>
-</html>
+    /*
+     * 【操作箇所のメモ】
+     * ・長針の先端位置： hands内 min-h の y2 値 (現在は 155 = 半径345相当)
+     * ・秒針の先端位置： hands内 sec-h の y2 値 (現在は 50 = 半径450相当)
+     * ・数字の配置距離： script内 nGループの変数 x, y 計算に使われる 39
