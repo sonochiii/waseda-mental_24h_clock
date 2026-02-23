@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Waseda Mental Clinic - Final Master Clock</title>
+    <title>Waseda Mental Clinic - Perfect Balance 24H Clock</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
@@ -21,7 +21,7 @@
         /* 外周ドットの視認性を上げる（縁取り） */
         .clock-dot {
             paint-order: stroke;
-            stroke-width: 2px; /* ドット用の繊細な縁取り */
+            stroke-width: 2px;
         }
 
         /* 針のアニメーション（ブレ）を完全排除 */
@@ -34,7 +34,9 @@
 <svg viewBox="0 0 1000 1000">
     <defs>
         <linearGradient id="bg-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="50%" stop-color="#5D4037" /> <stop offset="50%" stop-color="#FFF9E3" /> </linearGradient>
+            <stop offset="50%" stop-color="#5D4037" />
+            <stop offset="50%" stop-color="#FFF9E3" />
+        </linearGradient>
     </defs>
 
     <circle cx="500" cy="500" r="495" fill="url(#bg-grad)" stroke="#3E2723" stroke-width="6"/>
@@ -44,8 +46,9 @@
 
     <g id="hands">
         <line id="hour-h" x1="500" y1="500" x2="500" y2="300" stroke="#C0C0C0" stroke-width="16" stroke-linecap="round" />
-        <line id="min-h" x1="500" y1="500" x2="500" y2="160" stroke="#C0C0C0" stroke-width="11" stroke-linecap="round" />
-        <line id="sec-h" x1="500" y1="540" x2="500" y2="90" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
+        <line id="min-h" x1="500" y1="500" x2="500" y2="161" stroke="#C0C0C0" stroke-width="11" stroke-linecap="round" />
+        <line id="sec-h" x1="500" y1="540" x2="500" y2="89" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
+        
         <circle cx="500" cy="500" r="14" fill="#A0A0A0" />
         <circle cx="500" cy="500" r="6" fill="#FFD700" />
     </g>
@@ -56,7 +59,7 @@
 <script>
     const dG = document.getElementById('dots-container'), nG = document.getElementById('nums-container');
 
-    // 1. 秒ドット：縁取りを追加して視認性向上
+    // 1. 秒ドット：縁取りあり
     for (let i = 0; i < 60; i++) {
         const a = i * 6 * Math.PI / 180;
         const x = 500 + 465 * Math.sin(a), y = 500 - 465 * Math.cos(a);
@@ -64,32 +67,28 @@
         c.setAttribute("cx", x); c.setAttribute("cy", y);
         c.setAttribute("r", i % 5 === 0 ? "8" : "3.5");
         c.setAttribute("class", "clock-dot");
-        
-        const isDotTop = (i <= 15 || i >= 45); // 上半分のドット判断
+        const isDotTop = (i <= 15 || i >= 45);
         c.setAttribute("fill", isDotTop ? "#FFF9E3" : "#3E2723");
-        c.setAttribute("stroke", isDotTop ? "#3E2723" : "#FFF9E3"); // 反対色で縁取り
+        c.setAttribute("stroke", isDotTop ? "#3E2723" : "#FFF9E3");
         dG.appendChild(c);
     }
 
-    // 2. 24時間数字：元データのロジック厳守
+    // 2. 24時間数字：外周に寄せる (380 -> 395)
     for (let i = 1; i <= 24; i++) {
         const a = i * 15 * Math.PI / 180;
-        const x = 500 + 380 * Math.sin(a), y = 500 - 380 * Math.cos(a);
+        const x = 500 + 395 * Math.sin(a), y = 500 - 395 * Math.cos(a);
         const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
         t.setAttribute("x", x); t.setAttribute("y", y);
         t.setAttribute("text-anchor", "middle");
         t.setAttribute("dominant-baseline", "central");
         t.setAttribute("class", "clock-number");
-        
         const isNumTop = (i <= 6 || i >= 19);
         t.setAttribute("fill", isNumTop ? "#FFF9E3" : "#3E2723");
         t.setAttribute("stroke", isNumTop ? "#3E2723" : "#FFF9E3");
-        
         t.textContent = i;
         nG.appendChild(t);
     }
 
-    // 3. 更新関数：ブレのないステップ運針
     function update() {
         const now = new Date();
         const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
@@ -99,11 +98,11 @@
     }
 
     setInterval(update, 1000); update();
-    
-    // コードメモ: 
-    // - 外周ドットに class="clock-dot" を付与し、CSSで反対色の縁取りを実装。
-    // - ロゴ要素をSVG構造の最後に配置し、z-index的に最前面を維持。
-    // - 秒針の色を #FFD700 (Gold/Yellow) に設定。
+
+    // コードメモ:
+    // - 分針(y2=161)を短縮し、秒針(y2=89)を伸長。
+    // - 数字の配置半径を395に広げ、中心付近の空間的余裕を確保。
+    // - SVG描画順により、ロゴが全てのパーツの最前面に位置することを保証。
 </script>
 </body>
 </html>
