@@ -2,13 +2,12 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Waseda Mental Clinic - Final Masterpiece</title>
+    <title>Waseda Mental Clinic - The Heroic 24H Clock</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
         svg { width: 92vmin; height: 92vmin; font-family: 'M PLUS Rounded 1c', sans-serif; }
         
-        /* 数字の視認性：反対色の縁取り */
         .clock-number {
             font-size: 58px;
             font-weight: 800;
@@ -18,13 +17,11 @@
             stroke-linejoin: round;
         }
 
-        /* 外周ドットの視認性：反対色の縁取り */
         .clock-dot {
             paint-order: stroke;
             stroke-width: 2px;
         }
 
-        /* 針：ブレのない正確なステップ運針 */
         #sec-h, #min-h, #hour-h {
             transition: none !important;
         }
@@ -34,7 +31,9 @@
 <svg viewBox="0 0 1000 1000">
     <defs>
         <linearGradient id="bg-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="50%" stop-color="#5D4037" /> <stop offset="50%" stop-color="#FFF9E3" /> </linearGradient>
+            <stop offset="50%" stop-color="#5D4037" />
+            <stop offset="50%" stop-color="#FFF9E3" />
+        </linearGradient>
     </defs>
 
     <circle cx="500" cy="500" r="495" fill="url(#bg-grad)" stroke="#3E2723" stroke-width="6"/>
@@ -43,7 +42,7 @@
     <g id="nums-container"></g>
 
     <g id="hands">
-        <line id="hour-h" x1="500" y1="500" x2="500" y2="300" stroke="#C0C0C0" stroke-width="16" stroke-linecap="round" />
+        <line id="hour-h" x1="500" y1="500" x2="500" y2="280" stroke="#C0C0C0" stroke-width="16" stroke-linecap="round" />
         
         <line id="min-h" x1="500" y1="500" x2="500" y2="145" stroke="#C0C0C0" stroke-width="11" stroke-linecap="round" />
         
@@ -59,7 +58,6 @@
 <script>
     const dG = document.getElementById('dots-container'), nG = document.getElementById('nums-container');
 
-    // 1. 秒ドット（半径465）
     for (let i = 0; i < 60; i++) {
         const a = i * 6 * Math.PI / 180;
         const x = 500 + 465 * Math.sin(a), y = 500 - 465 * Math.cos(a);
@@ -73,7 +71,6 @@
         dG.appendChild(c);
     }
 
-    // 2. 24時間数字（半径395）
     for (let i = 1; i <= 24; i++) {
         const a = i * 15 * Math.PI / 180;
         const x = 500 + 395 * Math.sin(a), y = 500 - 395 * Math.cos(a);
@@ -89,7 +86,6 @@
         nG.appendChild(t);
     }
 
-    // 3. 運針
     function update() {
         const now = new Date();
         const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
@@ -97,15 +93,8 @@
         document.getElementById('min-h').setAttribute("transform", `rotate(${m * 6 + s * 0.1} 500 500)`);
         document.getElementById('hour-h').setAttribute("transform", `rotate(${(h % 24) * 15 + m * 0.25} 500 500)`);
     }
-
     setInterval(update, 1000); 
     update();
-
-    /*
-     * 【最終操作箇所のメモ】
-     * 1. 長針の先端：y2="145"（数字との間に数pxの完璧なマージンを確保）
-     * 2. 秒針の先端：y2="48"（ドットの内側にピタリと収まる長さ）
-     */
 </script>
 </body>
 </html>
