@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Waseda Mental Clinic - Absolute Balance Clock</title>
+    <title>Waseda Mental Clinic - Final Masterpiece</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
@@ -24,7 +24,7 @@
             stroke-width: 2px;
         }
 
-        /* 針：ブレのないステップ運針 */
+        /* 針：ブレのない正確なステップ運針 */
         #sec-h, #min-h, #hour-h {
             transition: none !important;
         }
@@ -45,9 +45,9 @@
     <g id="hands">
         <line id="hour-h" x1="500" y1="500" x2="500" y2="300" stroke="#C0C0C0" stroke-width="16" stroke-linecap="round" />
         
-        <line id="min-h" x1="500" y1="500" x2="500" y2="138" stroke="#C0C0C0" stroke-width="11" stroke-linecap="round" />
+        <line id="min-h" x1="500" y1="500" x2="500" y2="145" stroke="#C0C0C0" stroke-width="11" stroke-linecap="round" />
         
-        <line id="sec-h" x1="500" y1="540" x2="500" y2="53" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
+        <line id="sec-h" x1="500" y1="540" x2="500" y2="48" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
         
         <circle cx="500" cy="500" r="14" fill="#A0A0A0" />
         <circle cx="500" cy="500" r="6" fill="#FFD700" />
@@ -102,10 +102,9 @@
     update();
 
     /*
-     * 【メンテナンスメモ】
-     * 1. 長針の先端： min-h の y2="138" （数字半径395に対し絶妙な距離）
-     * 2. 秒針の先端： sec-h の y2="53" （ドット半径465に対し絶妙な距離）
-     * 3. 数字の距離： script内 半径 395
+     * 【最終操作箇所のメモ】
+     * 1. 長針の先端：y2="145"（数字との間に数pxの完璧なマージンを確保）
+     * 2. 秒針の先端：y2="48"（ドットの内側にピタリと収まる長さ）
      */
 </script>
 </body>
