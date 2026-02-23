@@ -2,13 +2,13 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Waseda Mental Clinic - Final Optimized 24H Clock</title>
+    <title>Waseda Mental Clinic - The Ultimate 24H Clock</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
         svg { width: 92vmin; height: 92vmin; font-family: 'M PLUS Rounded 1c', sans-serif; }
         
-        /* 数字の視認性を極限まで高める（縁取り） */
+        /* 数字の視認性：反対色の縁取り */
         .clock-number {
             font-size: 58px;
             font-weight: 800;
@@ -18,13 +18,13 @@
             stroke-linejoin: round;
         }
 
-        /* 外周ドットの視認性を上げる（縁取り） */
+        /* 外周ドットの視認性：反対色の縁取り */
         .clock-dot {
             paint-order: stroke;
             stroke-width: 2px;
         }
 
-        /* 針のアニメーション（ブレ）を完全排除 */
+        /* 針：ブレのないステップ運針 */
         #sec-h, #min-h, #hour-h {
             transition: none !important;
         }
@@ -34,9 +34,7 @@
 <svg viewBox="0 0 1000 1000">
     <defs>
         <linearGradient id="bg-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="50%" stop-color="#5D4037" />
-            <stop offset="50%" stop-color="#FFF9E3" />
-        </linearGradient>
+            <stop offset="50%" stop-color="#5D4037" /> <stop offset="50%" stop-color="#FFF9E3" /> </linearGradient>
     </defs>
 
     <circle cx="500" cy="500" r="495" fill="url(#bg-grad)" stroke="#3E2723" stroke-width="6"/>
@@ -46,8 +44,8 @@
 
     <g id="hands">
         <line id="hour-h" x1="500" y1="500" x2="500" y2="300" stroke="#C0C0C0" stroke-width="16" stroke-linecap="round" />
-        <line id="min-h" x1="500" y1="500" x2="500" y2="161" stroke="#C0C0C0" stroke-width="11" stroke-linecap="round" />
-        <line id="sec-h" x1="500" y1="540" x2="500" y2="88" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
+        <line id="min-h" x1="500" y1="500" x2="500" y2="160" stroke="#C0C0C0" stroke-width="11" stroke-linecap="round" />
+        <line id="sec-h" x1="500" y1="540" x2="500" y2="87" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
         
         <circle cx="500" cy="500" r="14" fill="#A0A0A0" />
         <circle cx="500" cy="500" r="6" fill="#FFD700" />
@@ -59,7 +57,7 @@
 <script>
     const dG = document.getElementById('dots-container'), nG = document.getElementById('nums-container');
 
-    // 1. 秒ドット：縁取り設定
+    // 1. 秒ドット（縁取りあり・60個）
     for (let i = 0; i < 60; i++) {
         const a = i * 6 * Math.PI / 180;
         const x = 500 + 465 * Math.sin(a), y = 500 - 465 * Math.cos(a);
@@ -73,7 +71,7 @@
         dG.appendChild(c);
     }
 
-    // 2. 24時間数字：外周寄せ配置（395）を維持
+    // 2. 24時間数字（縁取りあり・外周寄り配置395）
     for (let i = 1; i <= 24; i++) {
         const a = i * 15 * Math.PI / 180;
         const x = 500 + 395 * Math.sin(a), y = 500 - 395 * Math.cos(a);
@@ -89,6 +87,7 @@
         nG.appendChild(t);
     }
 
+    // 3. 時計の運針ロジック
     function update() {
         const now = new Date();
         const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
@@ -98,6 +97,11 @@
     }
 
     setInterval(update, 1000); update();
+
+    // 最終メモ:
+    // - 長針到達点: y2="160"
+    // - 秒針到達点: y2="87"
+    // - ロゴ・数字・ドットの全ての視認性と重なり順を最適化。
 </script>
 </body>
 </html>
