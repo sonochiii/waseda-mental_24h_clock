@@ -2,38 +2,18 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Waseda Mental Clinic - Final Masterpiece (Human-Centric Edition)</title>
+    <title>Waseda Mental Clinic - Final Absolute Stable Clock</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
         svg { width: 92vmin; height: 92vmin; font-family: 'M PLUS Rounded 1c', sans-serif; }
         
-        /* --------------------------------------------------
-           数字のデザイン設定
-           縁取り(stroke)を施し、背景色との境界でも視認性を確保
-        -------------------------------------------------- */
         .clock-number {
-            font-size: 58px;
-            font-weight: 800;
-            paint-order: stroke;
-            stroke-width: 8px; /* 縁取りの太さ */
-            stroke-linecap: round;
-            stroke-linejoin: round;
+            font-size: 58px; font-weight: 800; paint-order: stroke;
+            stroke-width: 8px; stroke-linecap: round; stroke-linejoin: round;
         }
-
-        /* --------------------------------------------------
-           外周ドットのデザイン設定
-           1秒ごとの指標。数字と同じく反対色の縁取りを適用
-        -------------------------------------------------- */
-        .clock-dot {
-            paint-order: stroke;
-            stroke-width: 2px;
-        }
-
-        /* 針：カチカチとした正確な動き(ステップ運針)を維持するためtransitionを排除 */
-        #sec-h, #min-h, #hour-h {
-            transition: none !important;
-        }
+        .clock-dot { paint-order: stroke; stroke-width: 2px; }
+        #sec-g, #min-h, #hour-h { transition: none !important; }
     </style>
 </head>
 <body>
@@ -53,7 +33,10 @@
         
         <line id="min-h" x1="500" y1="500" x2="500" y2="145" stroke="#C0C0C0" stroke-width="11" stroke-linecap="round" />
         
-        <line id="sec-h" x1="500" y1="540" x2="500" y2="48" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
+        <g id="sec-g">
+            <line x1="500" y1="500" x2="500" y2="48" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
+            <line x1="500" y1="500" x2="500" y2="540" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
+        </g>
         
         <circle cx="500" cy="500" r="14" fill="#A0A0A0" />
         <circle cx="500" cy="500" r="6" fill="#FFD700" />
@@ -65,28 +48,21 @@
 <script>
     const dG = document.getElementById('dots-container'), nG = document.getElementById('nums-container');
 
-    /**
-     * 【外周ドットの配置】
-     * 半径 465px の位置に60個のドットを配置
-     */
+    // 1. 外周ドット（半径465）
     for (let i = 0; i < 60; i++) {
         const a = i * 6 * Math.PI / 180;
         const x = 500 + 465 * Math.sin(a), y = 500 - 465 * Math.cos(a);
         const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         c.setAttribute("cx", x); c.setAttribute("cy", y);
-        c.setAttribute("r", i % 5 === 0 ? "8" : "3.5"); // 5秒ごとは太く
+        c.setAttribute("r", i % 5 === 0 ? "8" : "3.5");
         c.setAttribute("class", "clock-dot");
-        
-        const isDotTop = (i <= 15 || i >= 45); // 背景色とのコントラスト判定
+        const isDotTop = (i <= 15 || i >= 45);
         c.setAttribute("fill", isDotTop ? "#FFF9E3" : "#3E2723");
         c.setAttribute("stroke", isDotTop ? "#3E2723" : "#FFF9E3");
         dG.appendChild(c);
     }
 
-    /**
-     * 【24時間数字の配置】
-     * 半径 395px の位置に24個の数字を配置
-     */
+    // 2. 24時間数字（半径395）
     for (let i = 1; i <= 24; i++) {
         const a = i * 15 * Math.PI / 180;
         const x = 500 + 395 * Math.sin(a), y = 500 - 395 * Math.cos(a);
@@ -95,28 +71,30 @@
         t.setAttribute("text-anchor", "middle");
         t.setAttribute("dominant-baseline", "central");
         t.setAttribute("class", "clock-number");
-        
-        const isNumTop = (i <= 6 || i >= 19); // 19時〜6時は上部背景用
+        const isNumTop = (i <= 6 || i >= 19);
         t.setAttribute("fill", isNumTop ? "#FFF9E3" : "#3E2723");
         t.setAttribute("stroke", isNumTop ? "#3E2723" : "#FFF9E3");
         t.textContent = i;
         nG.appendChild(t);
     }
 
-    /**
-     * 【時刻の更新】
-     * デバイスのシステム時刻を取得し、針の角度(transform)を計算
-     */
+    // 3. 運針ロジック
     function update() {
         const now = new Date();
         const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
-        
-        // 秒針：1秒ごとに6度回転
-        document.getElementById('sec-h').setAttribute("transform", `rotate(${s * 6} 500 500)`);
-        // 分針：1分ごとに6度＋秒に応じた微動
+        // 秒針グループ(sec-g)を回すことで、後ろの飾りも連動
+        document.getElementById('sec-g').setAttribute("transform", `rotate(${s * 6} 500 500)`);
         document.getElementById('min-h').setAttribute("transform", `rotate(${m * 6 + s * 0.1} 500 500)`);
-        // 時針：1時間ごとに15度（24時間で一周）＋分に応じた微動
         document.getElementById('hour-h').setAttribute("transform", `rotate(${(h % 24) * 15 + m * 0.25} 500 500)`);
     }
+    setInterval(update, 1000); update();
 
-    // 1000ミリ秒(1秒)ごとに更新、および起動時に即時
+    /* * 人間用メモ：
+     * 時針の長さ：#hour-h の y2 (280)
+     * 分針の長さ：#min-h の y2 (145)
+     * 秒針の長さ：#sec-g内 最初のlineの y2 (48)
+     * 秒針の後ろ：#sec-g内 二番目のlineの y2 (540)
+     */
+</script>
+</body>
+</html>
