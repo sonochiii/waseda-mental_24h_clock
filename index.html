@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Waseda Mental Clinic - Front Logo 24H Clock</title>
+    <title>Waseda Mental Clinic - Final Master Clock</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
@@ -16,6 +16,12 @@
             stroke-width: 8px;
             stroke-linecap: round;
             stroke-linejoin: round;
+        }
+
+        /* 外周ドットの視認性を上げる（縁取り） */
+        .clock-dot {
+            paint-order: stroke;
+            stroke-width: 2px; /* ドット用の繊細な縁取り */
         }
 
         /* 針のアニメーション（ブレ）を完全排除 */
@@ -50,18 +56,22 @@
 <script>
     const dG = document.getElementById('dots-container'), nG = document.getElementById('nums-container');
 
-    // 1. 秒ドット
+    // 1. 秒ドット：縁取りを追加して視認性向上
     for (let i = 0; i < 60; i++) {
         const a = i * 6 * Math.PI / 180;
         const x = 500 + 465 * Math.sin(a), y = 500 - 465 * Math.cos(a);
         const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         c.setAttribute("cx", x); c.setAttribute("cy", y);
         c.setAttribute("r", i % 5 === 0 ? "8" : "3.5");
-        c.setAttribute("fill", (i > 15 && i < 45) ? "#3E2723" : "#FFF9E3");
+        c.setAttribute("class", "clock-dot");
+        
+        const isDotTop = (i <= 15 || i >= 45); // 上半分のドット判断
+        c.setAttribute("fill", isDotTop ? "#FFF9E3" : "#3E2723");
+        c.setAttribute("stroke", isDotTop ? "#3E2723" : "#FFF9E3"); // 反対色で縁取り
         dG.appendChild(c);
     }
 
-    // 2. 24時間数字
+    // 2. 24時間数字：元データのロジック厳守
     for (let i = 1; i <= 24; i++) {
         const a = i * 15 * Math.PI / 180;
         const x = 500 + 380 * Math.sin(a), y = 500 - 380 * Math.cos(a);
@@ -71,15 +81,15 @@
         t.setAttribute("dominant-baseline", "central");
         t.setAttribute("class", "clock-number");
         
-        const isTop = (i <= 6 || i >= 19);
-        t.setAttribute("fill", isTop ? "#FFF9E3" : "#3E2723");
-        t.setAttribute("stroke", isTop ? "#3E2723" : "#FFF9E3");
+        const isNumTop = (i <= 6 || i >= 19);
+        t.setAttribute("fill", isNumTop ? "#FFF9E3" : "#3E2723");
+        t.setAttribute("stroke", isNumTop ? "#3E2723" : "#FFF9E3");
         
         t.textContent = i;
         nG.appendChild(t);
     }
 
-    // 3. 更新関数
+    // 3. 更新関数：ブレのないステップ運針
     function update() {
         const now = new Date();
         const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
@@ -89,6 +99,11 @@
     }
 
     setInterval(update, 1000); update();
+    
+    // コードメモ: 
+    // - 外周ドットに class="clock-dot" を付与し、CSSで反対色の縁取りを実装。
+    // - ロゴ要素をSVG構造の最後に配置し、z-index的に最前面を維持。
+    // - 秒針の色を #FFD700 (Gold/Yellow) に設定。
 </script>
 </body>
 </html>
