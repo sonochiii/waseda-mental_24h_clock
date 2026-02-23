@@ -2,26 +2,35 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Waseda Mental Clinic - The Heroic 24H Clock</title>
+    <title>Waseda Mental Clinic - Final Masterpiece (Human-Centric Edition)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap');
         body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; overflow: hidden; }
         svg { width: 92vmin; height: 92vmin; font-family: 'M PLUS Rounded 1c', sans-serif; }
         
+        /* --------------------------------------------------
+           数字のデザイン設定
+           縁取り(stroke)を施し、背景色との境界でも視認性を確保
+        -------------------------------------------------- */
         .clock-number {
             font-size: 58px;
             font-weight: 800;
             paint-order: stroke;
-            stroke-width: 8px;
+            stroke-width: 8px; /* 縁取りの太さ */
             stroke-linecap: round;
             stroke-linejoin: round;
         }
 
+        /* --------------------------------------------------
+           外周ドットのデザイン設定
+           1秒ごとの指標。数字と同じく反対色の縁取りを適用
+        -------------------------------------------------- */
         .clock-dot {
             paint-order: stroke;
             stroke-width: 2px;
         }
 
+        /* 針：カチカチとした正確な動き(ステップ運針)を維持するためtransitionを排除 */
         #sec-h, #min-h, #hour-h {
             transition: none !important;
         }
@@ -31,9 +40,7 @@
 <svg viewBox="0 0 1000 1000">
     <defs>
         <linearGradient id="bg-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="50%" stop-color="#5D4037" />
-            <stop offset="50%" stop-color="#FFF9E3" />
-        </linearGradient>
+            <stop offset="50%" stop-color="#5D4037" /> <stop offset="50%" stop-color="#FFF9E3" /> </linearGradient>
     </defs>
 
     <circle cx="500" cy="500" r="495" fill="url(#bg-grad)" stroke="#3E2723" stroke-width="6"/>
@@ -58,19 +65,28 @@
 <script>
     const dG = document.getElementById('dots-container'), nG = document.getElementById('nums-container');
 
+    /**
+     * 【外周ドットの配置】
+     * 半径 465px の位置に60個のドットを配置
+     */
     for (let i = 0; i < 60; i++) {
         const a = i * 6 * Math.PI / 180;
         const x = 500 + 465 * Math.sin(a), y = 500 - 465 * Math.cos(a);
         const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         c.setAttribute("cx", x); c.setAttribute("cy", y);
-        c.setAttribute("r", i % 5 === 0 ? "8" : "3.5");
+        c.setAttribute("r", i % 5 === 0 ? "8" : "3.5"); // 5秒ごとは太く
         c.setAttribute("class", "clock-dot");
-        const isDotTop = (i <= 15 || i >= 45);
+        
+        const isDotTop = (i <= 15 || i >= 45); // 背景色とのコントラスト判定
         c.setAttribute("fill", isDotTop ? "#FFF9E3" : "#3E2723");
         c.setAttribute("stroke", isDotTop ? "#3E2723" : "#FFF9E3");
         dG.appendChild(c);
     }
 
+    /**
+     * 【24時間数字の配置】
+     * 半径 395px の位置に24個の数字を配置
+     */
     for (let i = 1; i <= 24; i++) {
         const a = i * 15 * Math.PI / 180;
         const x = 500 + 395 * Math.sin(a), y = 500 - 395 * Math.cos(a);
@@ -79,22 +95,28 @@
         t.setAttribute("text-anchor", "middle");
         t.setAttribute("dominant-baseline", "central");
         t.setAttribute("class", "clock-number");
-        const isNumTop = (i <= 6 || i >= 19);
+        
+        const isNumTop = (i <= 6 || i >= 19); // 19時〜6時は上部背景用
         t.setAttribute("fill", isNumTop ? "#FFF9E3" : "#3E2723");
         t.setAttribute("stroke", isNumTop ? "#3E2723" : "#FFF9E3");
         t.textContent = i;
         nG.appendChild(t);
     }
 
+    /**
+     * 【時刻の更新】
+     * デバイスのシステム時刻を取得し、針の角度(transform)を計算
+     */
     function update() {
         const now = new Date();
         const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
+        
+        // 秒針：1秒ごとに6度回転
         document.getElementById('sec-h').setAttribute("transform", `rotate(${s * 6} 500 500)`);
+        // 分針：1分ごとに6度＋秒に応じた微動
         document.getElementById('min-h').setAttribute("transform", `rotate(${m * 6 + s * 0.1} 500 500)`);
+        // 時針：1時間ごとに15度（24時間で一周）＋分に応じた微動
         document.getElementById('hour-h').setAttribute("transform", `rotate(${(h % 24) * 15 + m * 0.25} 500 500)`);
     }
-    setInterval(update, 1000); 
-    update();
-</script>
-</body>
-</html>
+
+    // 1000ミリ秒(1秒)ごとに更新、および起動時に即時
