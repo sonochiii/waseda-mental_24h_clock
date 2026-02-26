@@ -9,7 +9,7 @@
         svg { width: 92vmin; height: 92vmin; font-family: 'M PLUS Rounded 1c', sans-serif; }
         
         /* --------------------------------------------------
-           数字とドットの視認性設定
+            数字とドットを見やすくする設定
         -------------------------------------------------- */
         .clock-number {
             font-size: 58px; font-weight: 800; paint-order: stroke;
@@ -17,7 +17,7 @@
         }
         .clock-dot { paint-order: stroke; stroke-width: 2px; }
 
-        /* 針：カチカチとした正確なステップ運針を維持 */
+        /* 針がカチカチと動くようにする設定 */
         #sec-g, #min-h, #hour-h { transition: none !important; }
     </style>
 </head>
@@ -39,7 +39,7 @@
         <line id="min-h" x1="500" y1="500" x2="500" y2="145" stroke="#C0C0C0" stroke-width="11" stroke-linecap="round" />
         
         <g id="sec-g">
-            <line x1="500" y1="500" x2="500" y2="48" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
+            <line x1="500" y1="500" x2="500" y2="57" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
             <line x1="500" y1="500" x2="500" y2="540" stroke="#FFD700" stroke-width="5" stroke-linecap="round" />
         </g>
         
@@ -53,7 +53,7 @@
 <script>
     const dG = document.getElementById('dots-container'), nG = document.getElementById('nums-container');
 
-    // 外周ドットの配置（半径465）
+    // 外側のつぶつぶ（ドット）を並べる
     for (let i = 0; i < 60; i++) {
         const a = i * 6 * Math.PI / 180;
         const x = 500 + 465 * Math.sin(a), y = 500 - 465 * Math.cos(a);
@@ -67,7 +67,7 @@
         dG.appendChild(c);
     }
 
-    // 24時間数字の配置（半径395）
+    // 24時間の数字を並べる
     for (let i = 1; i <= 24; i++) {
         const a = i * 15 * Math.PI / 180;
         const x = 500 + 395 * Math.sin(a), y = 500 - 395 * Math.cos(a);
@@ -83,7 +83,7 @@
         nG.appendChild(t);
     }
 
-    // 運針更新ロジック
+    // 針を動かす仕組み
     function update() {
         const now = new Date();
         const s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
@@ -94,11 +94,11 @@
     setInterval(update, 1000); update();
 
     /* --------------------------------------------------
-     * 人間のための贈り物：メンテナンスガイド
-     * 1. 時針（短針）の長さ調整： hour-h の y2 値を増減（現在は270）
-     * 2. 分針（長針）の長さ調整： min-h の y2 値を増減（現在は145）
-     * 3. 秒針の長さ調整： sec-g 内の最初の line の y2 値（現在は48）
-     * 4. ロゴの高さ： text 要素の y 値（現在は720）
+     * 【 かんたん調整ガイド 】
+     * 1. 短い針（時針）を長くしたい： y2="270" の数字を小さくする
+     * 2. 長い針（分針）を長くしたい： y2="145" の数字を小さくする
+     * 3. 黄色の針（秒針）を長くしたい： y2="57" の数字を小さくする
+     * 4. ロゴの位置を下げたい： y="720" の数字を大きくする
      * -------------------------------------------------- */
 </script>
 </body>
